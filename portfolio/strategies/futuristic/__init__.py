@@ -1,0 +1,1 @@
+"""Futuristic strategy module."""
