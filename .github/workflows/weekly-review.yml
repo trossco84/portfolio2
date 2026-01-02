@@ -42,6 +42,8 @@ jobs:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
         run: |
+          # Create reports directory if it doesn't exist
+          mkdir -p reports
           python scripts/weekly_review.py --auto-execute
 
       - name: Upload reports
