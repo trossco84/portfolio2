@@ -58,9 +58,10 @@ DASHBOARD_URL=<your-fly-io-app-url>
 1. Syncs positions from Alpaca
 2. Runs portfolio analysis
 3. Calculates rebalance trades (>15% drift threshold)
-4. **Auto-executes trades** (with `--auto-execute` flag)
-5. Sends email summary via SendGrid
-6. Uploads reports as artifacts (90 day retention)
+4. Sends email summary via SendGrid with recommended trades
+5. Uploads reports as artifacts (90 day retention)
+
+**Note**: Auto-execution is disabled by default to avoid Pattern Day Trading (PDT) violations. To enable auto-execution, add `--auto-execute` flag in the workflow file.
 
 **Status**: ⚠️ Waiting for secrets to be added
 
@@ -97,24 +98,43 @@ You should receive an email within 2-3 minutes!
 ## What Happens Every Monday
 
 1. **9:00 AM UTC** - Workflow triggers automatically
-2. **Sync** - Fetches current positions from Alpaca  
+2. **Sync** - Fetches current positions from Alpaca
 3. **Analyze** - Runs strategy analysis and risk calculations
 4. **Rebalance** - Identifies trades needed (>15% drift only)
-5. **Execute** - Submits market orders to Alpaca (if needed)
-6. **Email** - Sends summary to your email
-7. **Artifact** - Uploads reports for 90 days
+5. **Email** - Sends summary with recommended trades to your email
+6. **Artifact** - Uploads reports for 90 days
 
-**Typical runtime**: 3-5 minutes
+**Typical runtime**: 2-3 minutes
+
+**Note**: Trades are NOT automatically executed to avoid PDT violations. You'll receive an email with recommendations and can execute manually.
+
+## Pattern Day Trading (PDT) Protection
+
+If your account has less than $25,000, you're subject to PDT rules:
+- Limited to 3 day trades per 5 trading days
+- A "day trade" = buying and selling the same security on the same day
+
+**Why auto-execution is disabled**:
+- Weekly rebalancing could trigger multiple day trades
+- Alpaca blocks trades that violate PDT rules
+- You receive recommendations via email instead
+- You can manually execute trades when PDT allows
+
+**To enable auto-execution** (if you have $25K+ or want to override):
+Edit [.github/workflows/weekly-review.yml](.github/workflows/weekly-review.yml) line 60:
+```yaml
+python scripts/weekly_review.py --auto-execute
+```
 
 ## Manual Execution
 
 You can still run manually anytime:
 
 ```bash
-# Run without auto-execution
+# Run without auto-execution (just get recommendations)
 python scripts/weekly_review.py
 
-# Run with auto-execution  
+# Run with auto-execution (attempts to execute trades)
 python scripts/weekly_review.py --auto-execute
 ```
 

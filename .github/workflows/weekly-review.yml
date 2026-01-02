@@ -56,7 +56,8 @@ jobs:
         run: |
           # Create reports directory if it doesn't exist
           mkdir -p reports
-          python scripts/weekly_review.py --auto-execute
+          # Run without auto-execute - just generate report and email
+          python scripts/weekly_review.py
 
       - name: Upload reports
         uses: actions/upload-artifact@v4

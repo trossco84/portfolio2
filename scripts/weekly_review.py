@@ -378,7 +378,9 @@ def execute_rebalance_trades(run_id: int, trades: list[dict]) -> bool:
     if failed > 0:
         print(f"⚠️  {failed} trades failed")
 
-    return failed == 0
+    # Return True even if some trades failed (e.g., PDT protection)
+    # We still want the workflow to succeed and send the email
+    return True
 
 
 def main():
@@ -419,10 +421,8 @@ def main():
 
     # Step 5: Auto-execute if enabled
     if trades and args.auto_execute:
-        execute_success = execute_rebalance_trades(run_id, trades)
-        if not execute_success:
-            print("⚠️  Some trades failed to execute")
-            return 1
+        execute_rebalance_trades(run_id, trades)
+        # Don't fail the workflow if some trades fail (e.g., PDT protection)
     elif trades:
         print(f"\n⏸️  {len(trades)} trades recommended")
         print("   To execute: python scripts/execute_live_trades.py")
