@@ -28,6 +28,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
+      - name: Test Alpaca connection
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: ${{ secrets.ALPACA_PAPER }}
+        run: |
+          python scripts/test_alpaca_connection.py
+
       - name: Run weekly review
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
