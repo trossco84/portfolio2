@@ -1,0 +1,34 @@
+🚀 QUICK START - GitHub Actions Setup
+
+1. PUSH TO GITHUB
+   git add .
+   git commit -m "Complete automated portfolio system"
+   git push
+
+2. ADD THESE 11 SECRETS
+   Go to: Settings → Secrets and variables → Actions → New repository secret
+
+   Copy values from your local .env file:
+
+   DATABASE_URL=<your-supabase-postgres-url>
+   ALPACA_API_KEY=<your-alpaca-api-key>
+   ALPACA_SECRET_KEY=<your-alpaca-secret-key>
+   ALPACA_PAPER=false
+   TOTAL_CAPITAL=10000
+   CASH_RESERVE=2000
+   SLEEVE_CAPITAL=2000
+   EMAIL_TO=<your-email@example.com>
+   EMAIL_FROM=<your-sendgrid-verified-sender@example.com>
+   SENDGRID_API_KEY=<your-sendgrid-api-key>
+   DASHBOARD_URL=<your-fly-io-app-url>
+
+3. TEST IT
+   Actions tab → Weekly Portfolio Review → Run workflow
+
+4. CHECK EMAIL
+   You'll get: 📊 Weekly Portfolio Review - [date]
+
+5. DONE!
+   Every Monday 9 AM UTC = automatic trades + email
+
+Dashboard: <your-fly-io-app-url>

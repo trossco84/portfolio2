@@ -51,16 +51,4 @@ jobs:
           name: weekly-reports-${{ github.run_number }}
           path: reports/
           retention-days: 90
-
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Weekly Portfolio Review Failed',
-              body: 'The weekly portfolio review workflow failed. Check the action logs for details.',
-              labels: ['automated', 'portfolio']
-            })
+          if-no-files-found: warn
