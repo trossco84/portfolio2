@@ -30,6 +30,9 @@ EMAIL_TO=<your-email@example.com>
 EMAIL_FROM=<your-sendgrid-verified-sender@example.com>
 SENDGRID_API_KEY=<your-sendgrid-api-key>
 
+# AI Analysis (Optional but recommended)
+ANTHROPIC_API_KEY=<your-anthropic-api-key>
+
 # Dashboard
 DASHBOARD_URL=<your-fly-io-app-url>
 ```
