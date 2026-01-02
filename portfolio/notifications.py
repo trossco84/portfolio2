@@ -61,8 +61,13 @@ class EmailNotifier:
     ) -> bool:
         """Send via SendGrid API."""
         try:
+            import os
+            import certifi
             from sendgrid import SendGridAPIClient
             from sendgrid.helpers.mail import Mail, Email, To, Content
+
+            # Set SSL certificate path for SendGrid's HTTP client
+            os.environ['SSL_CERT_FILE'] = certifi.where()
 
             message = Mail(
                 from_email=Email(self.email_from),
@@ -72,7 +77,7 @@ class EmailNotifier:
                 html_content=Content("text/html", body) if html else None
             )
 
-            sg = SendGridAPIClient(self.sendgrid_api_key)
+            sg = SendGridAPIClient(api_key=self.sendgrid_api_key)
             response = sg.send(message)
 
             if response.status_code in [200, 201, 202]:

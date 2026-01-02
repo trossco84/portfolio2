@@ -38,16 +38,48 @@ def get_alpaca_positions(client: TradingClient) -> list[dict]:
 
 
 def assign_sleeve(ticker: str, run_id: int) -> Sleeve:
-    """Determine which sleeve a ticker belongs to based on latest allocations."""
-    # Get allocations from latest run
+    """Determine which sleeve a ticker belongs to based on allocations."""
+    # First try current run's allocations
     allocations = repo.get_allocations(run_id=run_id)
 
     for alloc in allocations:
         if alloc.ticker == ticker:
             return alloc.sleeve
 
-    # Default to momentum if not found
-    return Sleeve.MOMENTUM
+    # If not found, look in previous runs' allocations (most recent first)
+    import psycopg
+    from portfolio.config import settings
+
+    with psycopg.connect(settings.database_url) as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT sleeve
+                FROM allocations
+                WHERE ticker = %s
+                ORDER BY run_id DESC
+                LIMIT 1
+            """, (ticker,))
+
+            row = cur.fetchone()
+            if row:
+                return Sleeve(row[0])
+
+    # If still not found, check which strategy universe it belongs to
+    from portfolio.data.universes import (
+        MOMENTUM_UNIVERSE,
+        FUTURISTIC_UNIVERSE,
+        REALWORLD_UNIVERSE,
+        RISK_UNIVERSE
+    )
+
+    if ticker in FUTURISTIC_UNIVERSE:
+        return Sleeve.FUTURISTIC
+    elif ticker in REALWORLD_UNIVERSE:
+        return Sleeve.REALWORLD
+    elif ticker in RISK_UNIVERSE:
+        return Sleeve.RISK
+    else:
+        return Sleeve.MOMENTUM
 
 
 def sync_positions_to_db(run_id: int, alpaca_positions: list[dict]):

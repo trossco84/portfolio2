@@ -105,11 +105,10 @@ def calculate_rebalance_trades(run_id: int, threshold: float = 0.15) -> list[dic
             rows = cur.fetchall()
             if rows:
                 for row in rows:
-                    ticker, shares, price = row
-                    positions[ticker] = {
-                        'shares': float(shares),
-                        'current_value': float(shares * price),
-                        'price': float(price)
+                    positions[row['ticker']] = {
+                        'shares': float(row['shares']),
+                        'current_value': float(row['shares'] * row['market_price']),
+                        'price': float(row['market_price'])
                     }
 
             # Target allocations
@@ -122,8 +121,7 @@ def calculate_rebalance_trades(run_id: int, threshold: float = 0.15) -> list[dic
             rows = cur.fetchall()
             if rows:
                 for row in rows:
-                    ticker, target_dollars = row
-                    targets[ticker] = float(target_dollars)
+                    targets[row['ticker']] = float(row['target_dollars'])
 
     # Calculate trades
     trades = []
@@ -211,7 +209,10 @@ def send_email_report(run_id: int, trades: list[dict]):
                 FROM runs
                 WHERE id = %s
             """, (run_id,))
-            run_date, nav_total, nav_cash = cur.fetchone()
+            run_row = cur.fetchone()
+            run_date = run_row['asof_date']
+            nav_total = run_row['nav_total']
+            nav_cash = run_row['nav_cash']
 
             # Risk metrics
             cur.execute("""
@@ -219,16 +220,16 @@ def send_email_report(run_id: int, trades: list[dict]):
                 FROM risk_metrics
                 WHERE run_id = %s
             """, (run_id,))
-            metrics = {row[0]: float(row[1]) for row in cur.fetchall()}
+            metrics = {row['metric_name']: float(row['metric_value']) for row in cur.fetchall()}
 
             # Positions by sleeve
             cur.execute("""
-                SELECT sleeve, COUNT(*), SUM(market_value)
+                SELECT sleeve, COUNT(*) as count, SUM(market_value) as total
                 FROM positions
                 WHERE run_id = %s
                 GROUP BY sleeve
             """, (run_id,))
-            sleeve_data = {row[0]: {'count': row[1], 'value': float(row[2])} for row in cur.fetchall()}
+            sleeve_data = {row['sleeve']: {'count': row['count'], 'value': float(row['total'])} for row in cur.fetchall()}
 
     # Build email
     email_body = f"""
