@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     # Dashboard
     dashboard_username: Optional[str] = None
     dashboard_password: Optional[str] = None
+    dashboard_url: Optional[str] = None
+
+    # Email notifications
+    email_from: Optional[str] = None
+    email_to: Optional[str] = None
+    sendgrid_api_key: Optional[str] = None
 
     # Environment
     environment: str = Field(default="development")

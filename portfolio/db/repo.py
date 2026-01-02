@@ -101,10 +101,51 @@ class PortfolioRepository:
         self.db.execute_update(query, params)
 
     def bulk_upsert_prices(self, prices: list[Price]) -> None:
-        """Bulk insert/update prices."""
-        for price in prices:
-            self.upsert_price(price)
-        logger.info(f"Upserted {len(prices)} price records")
+        """Bulk insert/update prices (optimized batch operation)."""
+        if not prices:
+            return
+
+        # Batch insert in chunks to avoid connection timeout
+        chunk_size = 100
+        total_inserted = 0
+
+        for i in range(0, len(prices), chunk_size):
+            chunk = prices[i:i + chunk_size]
+
+            # Build multi-row VALUES clause
+            values_list = []
+            params = []
+            for p in chunk:
+                values_list.append("(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+                params.extend([
+                    p.ticker,
+                    p.date,
+                    p.adj_close,
+                    p.close,
+                    p.open,
+                    p.high,
+                    p.low,
+                    p.volume,
+                    p.source,
+                ])
+
+            query = f"""
+                INSERT INTO prices (ticker, date, adj_close, close, open, high, low, volume, source)
+                VALUES {','.join(values_list)}
+                ON CONFLICT (ticker, date)
+                DO UPDATE SET
+                    adj_close = EXCLUDED.adj_close,
+                    close = EXCLUDED.close,
+                    open = EXCLUDED.open,
+                    high = EXCLUDED.high,
+                    low = EXCLUDED.low,
+                    volume = EXCLUDED.volume
+            """
+
+            self.db.execute_update(query, tuple(params))
+            total_inserted += len(chunk)
+
+        logger.info(f"Upserted {total_inserted} price records")
 
     def get_prices(
         self, ticker: str, start_date: date, end_date: date
