@@ -30,9 +30,13 @@ jobs:
 
       - name: Test Alpaca connection
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: ${{ secrets.ALPACA_PAPER }}
+          TOTAL_CAPITAL: ${{ secrets.TOTAL_CAPITAL }}
+          CASH_RESERVE: ${{ secrets.CASH_RESERVE }}
+          SLEEVE_CAPITAL: ${{ secrets.SLEEVE_CAPITAL }}
         run: |
           python scripts/test_alpaca_connection.py
 
