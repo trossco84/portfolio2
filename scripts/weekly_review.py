@@ -231,6 +231,32 @@ def send_email_report(run_id: int, trades: list[dict]):
             """, (run_id,))
             sleeve_data = {row['sleeve']: {'count': row['count'], 'value': float(row['total'])} for row in cur.fetchall()}
 
+            # Get all positions for AI analysis
+            cur.execute("""
+                SELECT ticker, shares, market_price, market_value, sleeve
+                FROM positions
+                WHERE run_id = %s
+                ORDER BY market_value DESC
+            """, (run_id,))
+            positions = [dict(row) for row in cur.fetchall()]
+
+    # Generate AI analysis
+    print("🤖 Generating AI portfolio analysis...")
+    from portfolio.ai.analysis import portfolio_analyzer
+
+    portfolio_data = {
+        'nav_total': float(nav_total),
+        'nav_cash': float(nav_cash),
+        'sleeve_breakdown': sleeve_data
+    }
+
+    ai_analysis = portfolio_analyzer.analyze_portfolio(
+        portfolio_data=portfolio_data,
+        positions=positions,
+        metrics=metrics,
+        recommended_trades=trades
+    )
+
     # Build email
     email_body = f"""
 📊 WEEKLY PORTFOLIO REVIEW - {run_date}
@@ -261,6 +287,10 @@ HOLDINGS BY SLEEVE
     for sleeve, data in sorted(sleeve_data.items()):
         email_body += f"{sleeve.upper():<15} {data['count']:>3} positions  ${data['value']:>10,.2f}\n"
 
+    email_body += f"\n{'='*80}\n"
+    email_body += "AI ANALYSIS\n"
+    email_body += f"{'='*80}\n\n"
+    email_body += ai_analysis + "\n"
     email_body += f"\n{'='*80}\n"
 
     if trades:

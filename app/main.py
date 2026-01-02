@@ -87,6 +87,13 @@ async def dashboard(request: Request, auth: bool = Depends(check_auth)):
                 allocations_by_sleeve[sleeve] = []
             allocations_by_sleeve[sleeve].append(alloc)
 
+        # Load ticker descriptions
+        try:
+            from portfolio.data.ticker_descriptions import TICKER_DESCRIPTIONS
+            ticker_descriptions = TICKER_DESCRIPTIONS
+        except ImportError:
+            ticker_descriptions = {}
+
         return templates.TemplateResponse(
             "dashboard.html",
             {
@@ -98,6 +105,7 @@ async def dashboard(request: Request, auth: bool = Depends(check_auth)):
                 "allocations_by_sleeve": allocations_by_sleeve,
                 "orders": orders,
                 "risk_metrics": risk_dict,
+                "ticker_descriptions": ticker_descriptions,
             },
         )
 

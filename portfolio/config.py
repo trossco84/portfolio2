@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     email_to: Optional[str] = None
     sendgrid_api_key: Optional[str] = None
 
+    # AI/LLM
+    anthropic_api_key: Optional[str] = None
+
     # Environment
     environment: str = Field(default="development")
     log_level: str = Field(default="INFO")

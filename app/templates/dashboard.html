@@ -184,6 +184,12 @@
             padding: 20px;
             text-align: center;
         }
+
+        .ticker-desc {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -270,7 +276,12 @@
                         {% for pos in positions %}
                         <tr>
                             <td>{{ pos.sleeve.value }}</td>
-                            <td><strong>{{ pos.ticker }}</strong></td>
+                            <td>
+                                <strong>{{ pos.ticker }}</strong>
+                                {% if ticker_descriptions and pos.ticker in ticker_descriptions %}
+                                <div class="ticker-desc">{{ ticker_descriptions[pos.ticker] }}</div>
+                                {% endif %}
+                            </td>
                             <td>{{ "{:.2f}".format(pos.shares) }}</td>
                             <td>${{ "{:.2f}".format(pos.market_price) }}</td>
                             <td>${{ "{:,.2f}".format(pos.market_value) }}</td>
