@@ -51,7 +51,6 @@ jobs:
       - name: Run monthly deep-dive
         if: steps.check_date.outputs.is_first_monday == 'true' || github.event_name == 'workflow_dispatch'
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: ${{ secrets.ALPACA_PAPER }}
@@ -66,8 +65,8 @@ jobs:
         run: |
           # Create reports directory
           mkdir -p reports
-          # Run monthly analysis
-          python scripts/monthly_review.py
+          # Run standalone monthly analysis (no database required)
+          python scripts/monthly_review_standalone.py
 
       - name: Upload monthly report
         if: (steps.check_date.outputs.is_first_monday == 'true' || github.event_name == 'workflow_dispatch') && always()

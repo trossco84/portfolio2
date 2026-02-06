@@ -12,8 +12,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Database
-    database_url: str = Field(..., description="Supabase Postgres connection string")
+    # Database (optional - not needed for standalone scripts)
+    database_url: Optional[str] = Field(default=None, description="Supabase Postgres connection string")
 
     # Portfolio configuration
     total_capital: Decimal = Field(default=Decimal("25000"), description="Total portfolio capital")

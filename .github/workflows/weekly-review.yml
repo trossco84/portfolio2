@@ -30,7 +30,6 @@ jobs:
 
       - name: Test Alpaca connection
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: ${{ secrets.ALPACA_PAPER }}
@@ -42,7 +41,6 @@ jobs:
 
       - name: Run weekly review
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: ${{ secrets.ALPACA_PAPER }}
@@ -57,8 +55,8 @@ jobs:
         run: |
           # Create reports directory if it doesn't exist
           mkdir -p reports
-          # Run without auto-execute - just generate report and email
-          python scripts/weekly_review.py
+          # Run standalone version (no database required)
+          python scripts/weekly_review_standalone.py
 
       - name: Upload reports
         uses: actions/upload-artifact@v4
